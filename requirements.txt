@@ -1,0 +1,36 @@
+# Web search APIs
+googlesearch-python
+playwright
+# Web content fetching and scraping
+requests               # For HTTP requests
+beautifulsoup4         # For HTML parsing
+unstructured           # For extracting text from documents (PDF, HTML, etc.)
+PyMuPDF   
+googlesearch-python
+playwright              # For advanced PDF parsing
+
+langchain-community
+langchain             
+sentence-transformers  # For local embedding models
+langchain-groq # i may use ollama.embeddings
+langchain-ollama
+
+#for vector db i am using FAISS 
+faiss-cpu
+
+
+# Other useful tools
+tqdm                   # Progress bars for downloads/parsing
+python-dotenv          # For secure API key management
+
+# Document parsing/Specific needs (optional)
+pdfplumber             # For PDF text extraction
+lxml                   # For performant HTML/XML parsing (speeds up BeautifulSoup)
+
+# Interactive apps (optional, pick one if you want a UI)
+streamlit              # For quick web prototyping UI
+
+
+# Scientific papers search APIs (optional)
+arxiv                # Official arXiv API wrapper
+semanticscholar      # Semantic Scholar API client

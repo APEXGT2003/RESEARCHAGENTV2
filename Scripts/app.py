@@ -7,16 +7,24 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain.chains import create_retrieval_chain
 from langchain_community.vectorstores import FAISS
 from langchain_community.document_loaders import PyPDFDirectoryLoader
+from web_crawler import crawler
 import os
 
 
 from dotenv import load_dotenv
-load_dotenv('api_keys/.env')
+load_dotenv('../api_keys/.env')
 os.environ["GROQ_API_KEY"]=os.getenv("GROQ_API_KEY")
 api_key=os.environ["GROQ_API_KEY"]
 embeddings = OllamaEmbeddings(model="nomic-embed-text") #pull this model in ollama local.
-processed_file="Data/processed"
-vectordb_path="Data/vectordb"
+
+# Get the project root directory (one level up from Scripts/)
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+processed_file = os.path.join(project_root, "Data", "processed")
+vectordb_path = os.path.join(project_root, "Data", "vectordb")
+
+# Create directories if they don't exist
+os.makedirs(processed_file, exist_ok=True)
+os.makedirs(vectordb_path, exist_ok=True)
 #relod the session to get past process
 st.title("Research agent") 
 
@@ -43,8 +51,7 @@ def create_vector_embeddings():
     vectors.save_local(vectordb_path)
     st.session_state.vectors = vectors
 
-
-THRESHOLD=0.7 #if u have good suggestion value put it here.
+THRESHOLD=0.4 #if u have good suggestion value put it here.
 
 
 if prompt:
@@ -62,6 +69,12 @@ if prompt:
     top_dists = [score for _, score in docs_and_scores]
     top_sims = [1 - dist for dist in top_dists]
     if not top_docs or top_sims[0] < THRESHOLD:
+
+
+
+        crawler(prompt)
+        create_vector_embeddings()
+        
         #web_crawler code here
         #llm gives query to web crawler (take the prompt and make it into a query type using llm's capability to get the best result )
         #web crawler finds relvant pages and makes it into pdf's

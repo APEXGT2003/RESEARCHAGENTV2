@@ -22,6 +22,9 @@ processed_file = "Data/processed"
 vectordb_path = "Data/vectordb"
 cache_file = "cache/file_hashes.json"
 
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []
+
 
 st.title("Research Agent")
 embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
@@ -36,10 +39,38 @@ chat_prompt = ChatPromptTemplate.from_template(
     """
 )
 
-prompt = st.text_input("Enter your prompt")
+for entry in st.session_state.chat_history:
+    with st.chat_message("user"):
+        st.markdown(entry["user"])
+    with st.chat_message("assistant"):
+        st.markdown(
+            f"""
+            <div style="background-color: #F0F0F0; padding: 10px; border-radius: 10px;">
+                {entry["bot"]}
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+prompt = st.chat_input("Ask your research question...")
 changes_detected = False
 
 if prompt:
+    with st.chat_message("user"):
+        st.markdown(prompt)
+
+    with st.chat_message("assistant"):
+        response_placeholder = st.empty()
+        response_placeholder.markdown(
+            f"""
+            <div style="background-color: #F0F0F0; padding: 10px; border-radius: 10px;">
+                *Typing...*
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+
     if "vectors" not in st.session_state:
         if not os.path.exists(f"{vectordb_path}/index.faiss"):
             create_vector_embeddings(processed_file, vectordb_path, embeddings, st)
@@ -77,8 +108,23 @@ if prompt:
         create_vector_embeddings(processed_file, vectordb_path, embeddings, st)
         st.session_state.vectors = FAISS.load_local(vectordb_path, embeddings, allow_dangerous_deserialization=True)
 
+    context = "\n".join([f"User: {entry['user']}\nAssistant: {entry['bot']}" for entry in st.session_state.chat_history])
+
     document_chain = create_stuff_documents_chain(llm, chat_prompt)
     retriever = st.session_state.vectors.as_retriever()
     retrieval_chain = create_retrieval_chain(retriever, document_chain)
-    response = retrieval_chain.invoke({'input': prompt})
-    st.write(response["answer"])
+    response = retrieval_chain.invoke({'input': prompt, 'context': context})
+
+    response_placeholder.markdown(
+        f"""
+        <div style="background-color: #F0F0F0; padding: 10px; border-radius: 10px;">
+            {response["answer"]}
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    # Save chat
+    st.session_state.chat_history.append({"user": prompt, "bot": response["answer"]})
+
+

@@ -13,7 +13,7 @@ langchain-community
 langchain             
 sentence-transformers  # For local embedding models
 langchain-groq # i may use ollama.embeddings
-langchain-ollama
+langchain-huggingface
 
 #for vector db i am using FAISS 
 faiss-cpu

@@ -3,7 +3,7 @@ import asyncio
 from playwright.async_api import async_playwright
 
 def fetch_urls(query, num_results):
-    raw_urls = list(search(query, num_results=num_results))
+    raw_urls = list(search(query, num=num_results))
     urls = []
 
     for i, url in enumerate(raw_urls):
@@ -12,7 +12,7 @@ def fetch_urls(query, num_results):
 
     return urls
 
-async def scrape_website():
+async def scrape_website(question):
     urls = fetch_urls(question, 5)
     async with async_playwright() as p:
         # Headless must be True to use page.pdf()
@@ -31,9 +31,7 @@ async def scrape_website():
 
         await browser.close()
 
-if __name__ == "__main__":
-    question = "DSA "
-    asyncio.run(scrape_website())
+
 
 
 

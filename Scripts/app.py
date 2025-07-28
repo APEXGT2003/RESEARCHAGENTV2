@@ -7,13 +7,15 @@ from langchain.chains import create_retrieval_chain
 from langchain_community.vectorstores import FAISS
 from langchain_community.document_loaders import PyPDFDirectoryLoader
 from langchain_huggingface import HuggingFaceEmbeddings
-from vector_store import create_vector_embeddings, has_changes
+from vector_store import create_vector_embeddings,has_changes
 from web_crawler import crawler
 import os
 from dotenv import load_dotenv
 import base64
 
-image_path = os.path.join(os.path.dirname(__file__), "images", "bg.png")
+
+
+image_path = r"C:\Users\Goutham\ResearchAgent\Scripts\images\bg.png"
 
 def get_base64_image(image_path):
     with open(image_path, "rb") as img_file:
@@ -21,35 +23,75 @@ def get_base64_image(image_path):
 
 bg_base64 = get_base64_image(image_path)
 
-st.markdown("""
+
+# bg_base64 = get_base64_image(image_path)
+
+st.markdown(f"""
     <style>
-    /* Make entire app background transparent */
-    .main, .block-container {
-        background-color: rgba(0, 0, 0, 0);
-    }
+    /* 1. Main background for the entire app */
+    .stApp {{
+        background-image:
+            linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
+            url("data:image/png;base64,{bg_base64}");
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background-position: center;
+    }}
 
-    /* Remove background of input area container */
-    .st-emotion-cache-z5fcl4 {
-        background-color: rgba(0, 0, 0, 0) !important;
-    }
+    /* 2. Make core layout transparent */
+    [data-testid="stHeader"], [data-testid="stToolbar"], .main .block-container {{
+        background: transparent !important;
+    }}
 
-    /* Make text input box transparent */
-    .stTextInput>div>div>input {
-        background-color: rgba(0, 0, 0, 0) !important;
-        color: white !important;
-    }
+    /* 3. Style chat messages to "float" */
+    [data-testid="stChatMessage"] {{
+        background-color: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 10px;
+        padding: 1rem 1.5rem;
+        margin-bottom: 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }}
 
-    /* Make the container of input and submit button blend */
-    .st-emotion-cache-1kyxreq {
-        background-color: rgba(0, 0, 0, 0) !important;
-    }
+    /* 4. COMPLETELY HIDE the chat input container */
+    div[data-testid="stChatInput"] {{
+        display: none !important;
+    }}
 
-    /* Optional: remove red border if undesired */
-    .stTextInput>div>div {
+    /* 5. Create a custom floating input using regular text input */
+    .stTextInput {{
+        position: fixed !important;
+        bottom: 2rem !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        width: 50% !important;
+        z-index: 1000 !important;
+    }}
+
+    /* 6. Style the custom floating text input */
+    .stTextInput>div>div {{
+        background-color: rgba(0, 0, 0, 0.4) !important;
+        backdrop-filter: blur(15px) !important;
         border: 1px solid rgba(255, 255, 255, 0.3) !important;
-        border-radius: 30px;
-    }
+        border-radius: 30px !important;
+    }}
+    
+    .stTextInput>div>div>input {{
+        color: white !important;
+        background: transparent !important;
+        border: none !important;
+    }}
 
+    /* 7. Reduce bottom padding since there's no bottom bar anymore */
+    .block-container {{
+        padding-bottom: 2rem !important;
+    }}
+
+    /* 8. Hide Streamlit's default footer */
+    footer {{
+        display: none;
+    }}
     </style>
 """, unsafe_allow_html=True)
 
@@ -115,7 +157,7 @@ for entry in st.session_state.chat_history:
         st.markdown(entry["bot"])
 
 
-prompt = st.chat_input("Ask your research question...")
+prompt = st.text_input("Ask your research question...")
 changes_detected = False
 
 if prompt:
@@ -202,5 +244,4 @@ if prompt:
 
     # Save chat
     st.session_state.chat_history.append({"user": prompt, "bot": response["answer"]})
-
 
